@@ -16,6 +16,7 @@
     "openclaw:dry": "node scripts/openclaw-worker.mjs --once --dry-run"
   },
   "dependencies": {
+    "@animocabrands/minds-client-lib": "^0.1.4",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

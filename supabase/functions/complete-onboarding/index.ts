@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, jsonResponse } from "../_shared/cors.ts";
+import { syncCreatorContext } from "../_shared/minds/context.ts";
 
 type InspirationInput = {
   youtubeUrl: string;
@@ -265,6 +266,53 @@ Deno.serve(async (req) => {
   });
 
   if (logError) return jsonResponse(500, { error: logError.message });
+
+  // --- STEP 5: Save Creator DNA and Goals ---
+  const { error: dnaError } = await adminClient.from("creator_dna").upsert({
+    user_id: user.id,
+    niche: goal,
+    target_audience: "",
+    tone,
+    preferred_formats: [scriptLengthPreference],
+    avoid_topics: bannedPhrases,
+    primary_platform: "YouTube",
+    updated_at: now,
+  }, { onConflict: 'user_id' });
+
+  if (dnaError) console.error("Failed to insert DNA:", dnaError);
+
+  const { error: goalsError } = await adminClient.from("creator_goals").insert({
+    user_id: user.id,
+    goal_type: "Channel Baseline",
+    target_metric: goal,
+    current_value: 0,
+    status: "active",
+    priority: "high"
+  });
+
+  if (goalsError) console.error("Failed to insert Goals:", goalsError);
+
+  // Sync to Minds SDK
+  try {
+    await syncCreatorContext({
+      niche: goal,
+      audience: "",
+      tone,
+      goal: goal,
+      preferred_formats: [scriptLengthPreference],
+      avoid: bannedPhrases,
+      primary_platform: "YouTube"
+    }, [{
+      goal_type: "Channel Baseline",
+      target_metric: goal,
+      current_value: 0,
+      status: "active",
+      priority: "high"
+    }]);
+    console.log("Successfully synced context to Animoca Mind.");
+  } catch (err) {
+    console.error("Failed to sync context to Animoca Mind:", err);
+  }
 
   return jsonResponse(200, {
     channelSummaryPrompt,
