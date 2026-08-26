@@ -1,0 +1,58 @@
+project_id = "ciaxfxuqucidzqbdgydg"
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.create-checkout-session]
+verify_jwt = false
+
+[functions.run-pipeline]
+verify_jwt = false
+
+[functions.submit-run-feedback]
+verify_jwt = false
+
+[functions.create-connect-account]
+verify_jwt = false
+
+[functions.create-connect-checkout-session]
+verify_jwt = false
+
+[functions.delete-project]
+verify_jwt = false
+
+[functions.complete-onboarding]
+verify_jwt = false
+
+[functions.suggest-video-copy]
+verify_jwt = false
+
+[functions.analyze-approved-artifact]
+verify_jwt = false
+
+[functions.openclaw-pull-jobs]
+verify_jwt = false
+
+[functions.openclaw-push-insights]
+verify_jwt = false
+
+[functions.finalize-approved-output]
+verify_jwt = false
+
+[functions.youtube-connect-start]
+verify_jwt = false
+
+[functions.youtube-connect-callback]
+verify_jwt = false
+
+[functions.youtube-sync-channel]
+verify_jwt = false
+
+[functions.sync-inspiration-channels]
+verify_jwt = false
+
+[functions.enqueue-hourly-analysis]
+verify_jwt = false
+
+[functions.enqueue-inspiration-refresh]
+verify_jwt = false

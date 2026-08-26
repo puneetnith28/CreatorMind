@@ -1,0 +1,22 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cp-body" x1="16" y1="40" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6" />
+      <stop offset="1" stop-color="#1E3A8A" />
+    </linearGradient>
+    <linearGradient id="cp-accent" x1="50" y1="24" x2="180" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A855F7" />
+      <stop offset="0.5" stop-color="#10B981" />
+      <stop offset="1" stop-color="#F97316" />
+    </linearGradient>
+  </defs>
+
+  <rect width="256" height="256" rx="52" fill="#F8FAFC" />
+
+  <rect x="58" y="26" width="42" height="22" rx="6" transform="rotate(12 58 26)" fill="url(#cp-accent)" />
+  <rect x="107" y="20" width="42" height="22" rx="6" transform="rotate(12 107 20)" fill="url(#cp-accent)" />
+  <rect x="156" y="16" width="42" height="22" rx="6" transform="rotate(12 156 16)" fill="url(#cp-accent)" />
+
+  <path d="M32 102C32 90.9543 40.9543 82 52 82H188C199.046 82 208 90.9543 208 102V170C208 181.046 199.046 190 188 190H52C40.9543 190 32 181.046 32 170V102Z" fill="url(#cp-body)" />
+  <path d="M88 132L142 164L88 196V132Z" fill="#DBEAFE" />
+</svg>
