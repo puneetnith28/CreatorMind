@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { OpportunityEngine } from "@/components/OpportunityEngine";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { AgentStateMachine } from "@/components/AgentStateMachine";
+import { MindMemoryUI } from "@/components/MindMemoryUI";
 
 interface VideoRow {
   id: string;
@@ -179,6 +180,7 @@ export default function Dashboard() {
         <AgentStateMachine />
         <OpportunityEngine />
         <ActivityTimeline />
+        <MindMemoryUI />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="surface-card">

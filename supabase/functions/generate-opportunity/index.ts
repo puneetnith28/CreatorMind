@@ -66,7 +66,14 @@ Return your answer in the following strict JSON format ONLY. Do not include any 
   "title": "Short, punchy title",
   "description": "Clear explanation of what to do",
   "reasoning": "Why this is the best move right now based on my goals",
-  "evidence": ["Data point 1", "Data point 2"]
+  "evidence": ["Data point 1", "Data point 2"],
+  "experiment": {
+    "hypothesis": "e.g., Using a problem-first hook will increase retention compared to a traditional hook.",
+    "variant_a": "e.g., Problem-first hook (start with the user's pain point)",
+    "variant_b": "e.g., Traditional hook (start with a high-energy intro)",
+    "baseline_metric": {"metric": "Retention at 30s"},
+    "success_metric": {"metric": "Retention at 30s"}
+  }
 }
 `.trim();
 
@@ -85,7 +92,14 @@ Return your answer in the following strict JSON format ONLY. Do not include any 
       title: "Double Down on Video WorkLoop",
       description: "Your 'Video WorkLoop' content is driving all your recent views and engagement. Create a follow-up or a deep-dive series on this topic.",
       reasoning: "Since 'Video WorkLoop' generated 16 views and 2 likes compared to 0 on other videos, the audience has clearly validated this concept. Leaning into proven winners is the fastest path to growth.",
-      evidence: ["Video WorkLoop: 16 views, 2 likes", "Open Source Workshop: 0 views, 0 likes"]
+      evidence: ["Video WorkLoop: 16 views, 2 likes", "Open Source Workshop: 0 views, 0 likes"],
+      experiment: {
+        hypothesis: "A deep-dive tutorial will yield higher retention than a broad overview.",
+        variant_a: "Deep-dive tutorial (step-by-step)",
+        variant_b: "Broad overview (high-level concepts)",
+        baseline_metric: { metric: "Average View Duration" },
+        success_metric: { metric: "Average View Duration" }
+      }
     };
 
     // Try to parse JSON. Sometimes LLMs wrap in ```json ... ``` or add conversational text
@@ -130,6 +144,22 @@ Return your answer in the following strict JSON format ONLY. Do not include any 
     }).select().single();
 
     if (insertError) throw insertError;
+
+    // 5. Save the Proposed Experiment
+    if (parsedData.experiment) {
+      const { error: expError } = await adminClient.from("experiments").insert({
+        user_id: user.id, // references auth.users(id)
+        hypothesis: parsedData.experiment.hypothesis,
+        variant_a: parsedData.experiment.variant_a,
+        variant_b: parsedData.experiment.variant_b,
+        baseline_metric: parsedData.experiment.baseline_metric,
+        success_metric: parsedData.experiment.success_metric,
+        status: "proposed"
+      });
+      if (expError) {
+        console.error("Failed to insert proposed experiment:", expError);
+      }
+    }
 
     return jsonResponse(200, { opportunity: newOpportunity });
 

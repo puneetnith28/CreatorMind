@@ -225,14 +225,103 @@ async function decideFollowUpAction(completedTask, resultData) {
   }
 }
 
+async function observeExperimentOutcomes() {
+  console.log(`[Worker] Checking for mature experiments to evaluate...`);
+  // Look for active experiments older than 24 hours
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  
+  const { data: experiments, error } = await supabase
+    .from('experiments')
+    .select('*')
+    .eq('status', 'active')
+    .lte('updated_at', twentyFourHoursAgo);
+    
+  if (error || !experiments || experiments.length === 0) {
+    return;
+  }
+
+  const youtubeApiKey = process.env.YOUTUBE_API_KEY;
+  if (!youtubeApiKey) {
+    console.warn(`[Worker] Missing YOUTUBE_API_KEY. Cannot observe experiment outcomes.`);
+    return;
+  }
+
+  for (const exp of experiments) {
+    // If we don't have a video id tied to it, we can't observe it yet
+    if (!exp.youtube_video_id) {
+      continue;
+    }
+
+    try {
+      console.log(`[Worker] Evaluating experiment ${exp.id} on YouTube Video ${exp.youtube_video_id}`);
+      const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${exp.youtube_video_id}&key=${youtubeApiKey}`);
+      const data = await res.json();
+      
+      if (data.items && data.items.length > 0) {
+        const stats = data.items[0].statistics;
+        const viewCount = parseInt(stats.viewCount, 10);
+        
+        // Simple logic for learning: if views > 1000, consider Variant A successful (winner = A)
+        // In a real scenario, this compares baseline to current metrics.
+        const baselineViews = exp.baseline_metric?.views || 0;
+        const winner = viewCount > baselineViews + 500 ? 'A' : (viewCount > baselineViews ? 'inconclusive' : 'B');
+        
+        await supabase.from('experiments').update({
+          status: 'completed',
+          winner: winner,
+          success_metric: { ...exp.success_metric, final_views: viewCount },
+          updated_at: new Date().toISOString()
+        }).eq('id', exp.id);
+        
+        console.log(`[Worker] Experiment ${exp.id} completed. Winner: ${winner}. Views: ${viewCount}`);
+
+        // Phase 9 Step 4: The Learning Extractor
+        if (winner === 'A' || winner === 'B') {
+          const winningVariant = winner === 'A' ? exp.variant_a : exp.variant_b;
+          const learningSummary = `Experiment concluded: The hypothesis "${exp.hypothesis}" proved successful. The winning approach is "${winningVariant}". Use this as a rule for future content.`;
+          
+          await supabase.from('agent_memory').insert({
+            user_id: exp.user_id,
+            video_id: exp.video_id,
+            key: `experiment_learning_${exp.id}`,
+            value: {
+              learning: learningSummary,
+              hypothesis: exp.hypothesis,
+              winning_variant: winningVariant,
+              baseline_views: baselineViews,
+              final_views: viewCount
+            },
+            source: 'experiment',
+            priority: 2 // High priority since it's scientifically proven
+          });
+          
+          await supabase.from('growth_events').insert({
+            user_id: exp.user_id,
+            event_type: 'EXPERIMENT_WON',
+            metadata: { experiment_id: exp.id, winner: winner, learning: learningSummary }
+          });
+          
+          console.log(`[Worker] Extracted learning and saved to Creator Preferences.`);
+        }
+      }
+    } catch (e) {
+      console.error(`[Worker] Failed to evaluate experiment ${exp.id}:`, e);
+    }
+  }
+}
+
 async function runLoop() {
   console.log("🚀 Agent Worker Started");
   if (isDryRun) console.log("⚠️ Running in DRY RUN mode");
   
   await processPendingTasks();
+  await observeExperimentOutcomes();
   
   if (!runOnce) {
-    setInterval(processPendingTasks, POLLING_INTERVAL_MS);
+    setInterval(async () => {
+      await processPendingTasks();
+      await observeExperimentOutcomes();
+    }, POLLING_INTERVAL_MS);
   } else {
     console.log("Finished single pass.");
     process.exit(0);
