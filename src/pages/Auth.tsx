@@ -115,10 +115,10 @@ export default function Auth() {
           </CardHeader>
           <CardContent className="space-y-3">
             {[
-              "Complete onboarding to define channel identity",
-              "Create a video project and run the 4+1 pipeline",
-              "Approve/reject artifacts with structured feedback",
-              "Track traces, costs, and iterative memory improvements",
+              "Define Creator DNA and growth goals",
+              "Autonomous worker detects opportunities from audience signals",
+              "Approve generated ideas and teach the Mind with feedback",
+              "Mind runs experiments, learns what works, and adapts autonomously",
             ].map((step, index) => (
               <div key={step} className="rounded-xl border border-slate-200 bg-white p-3">
                 <p className="text-xs uppercase tracking-wide text-slate-500 mb-1">Step {index + 1}</p>
