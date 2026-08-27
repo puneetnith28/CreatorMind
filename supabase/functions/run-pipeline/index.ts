@@ -882,17 +882,24 @@ Deno.serve(async (req) => {
     return jsonResponse(401, { error: "Missing authorization header" });
   }
 
-  const userClient = createClient(supabaseUrl, anonKey, {
-    global: { headers: { Authorization: authHeader } },
-  });
-
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
+  let userId: string;
 
-  const { data: authData, error: authError } = await userClient.auth.getUser();
-  const user = authData?.user;
-  if (authError || !user) {
-    return jsonResponse(401, { error: "Unauthorized" });
+  if (authHeader === `Bearer ${serviceRoleKey}`) {
+    // Autonomous worker invocation
+    const body = await req.clone().json().catch(() => ({}));
+    if (!body?.userId) return jsonResponse(400, { error: "Missing userId for autonomous invocation" });
+    userId = body.userId;
+  } else {
+    const userClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: authData, error: authError } = await userClient.auth.getUser();
+    if (authError || !authData?.user) return jsonResponse(401, { error: "Unauthorized" });
+    userId = authData.user.id;
   }
+  
+  const user = { id: userId };
 
   const body = await req.json().catch(() => null) as { videoId?: string } | null;
   const videoId = body?.videoId?.trim();

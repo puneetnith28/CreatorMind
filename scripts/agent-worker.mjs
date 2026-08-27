@@ -135,21 +135,21 @@ async function executeTask(task) {
     case 'analyze_youtube_video':
       console.log(`[Worker] Executing analyze_youtube_video...`);
       const { data: ytData, error: ytErr } = await createClient(supabaseUrl, supabaseServiceKey, authConfig)
-        .functions.invoke('queue-youtube-analysis', { body: payload });
+        .functions.invoke('queue-youtube-analysis', { body: { ...payload, userId: task.user_id } });
       if (ytErr) throw ytErr;
       return ytData;
       
     case 'generate_opportunity':
       console.log(`[Worker] Executing generate_opportunity...`);
       const { data: oppData, error: oppErr } = await createClient(supabaseUrl, supabaseServiceKey, authConfig)
-        .functions.invoke('generate-opportunity', { body: payload });
+        .functions.invoke('generate-opportunity', { body: { ...payload, userId: task.user_id } });
       if (oppErr) throw oppErr;
       return oppData;
       
     case 'run_pipeline':
       console.log(`[Worker] Executing run_pipeline...`);
       const { data: pipeData, error: pipeErr } = await createClient(supabaseUrl, supabaseServiceKey, authConfig)
-        .functions.invoke('run-pipeline', { body: payload });
+        .functions.invoke('run-pipeline', { body: { ...payload, userId: task.user_id } });
       if (pipeErr) throw pipeErr;
       return pipeData;
       
@@ -310,16 +310,61 @@ async function observeExperimentOutcomes() {
   }
 }
 
+async function observeCreatorGoals() {
+  console.log(`[Worker] Polling for active creator goals...`);
+  
+  const { data: goals, error } = await supabase
+    .from('creator_goals')
+    .select('user_id')
+    .eq('status', 'active');
+    
+  if (error || !goals || goals.length === 0) return;
+  
+  const uniqueUsers = [...new Set(goals.map(g => g.user_id))];
+  
+  for (const userId of uniqueUsers) {
+    // Only spawn a generic opportunity if we haven't done so in the last hour
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+    const { data: recentTasks, error: taskErr } = await supabase
+      .from('agent_tasks')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('task_type', 'generate_opportunity')
+      .gte('created_at', oneHourAgo);
+      
+    if (taskErr) continue;
+    
+    if (!recentTasks || recentTasks.length === 0) {
+      console.log(`[Worker] Decision: Creator ${userId} has active goals but no recent opportunities. Spawning generate_opportunity task.`);
+      
+      await supabase.from('agent_tasks').insert({
+        user_id: userId,
+        task_type: 'generate_opportunity',
+        payload: { context: "Autonomous periodic check" }
+      });
+      
+      await supabase.from('growth_events').insert({
+        user_id: userId,
+        event_type: 'OPPORTUNITY_FOUND',
+        metadata: { source: 'worker_periodic_polling' }
+      });
+    }
+  }
+}
+
 async function runLoop() {
   console.log("🚀 Agent Worker Started");
   if (isDryRun) console.log("⚠️ Running in DRY RUN mode");
   
   await processPendingTasks();
+  await observeCreatorGoals();
   await observeExperimentOutcomes();
   
   if (!runOnce) {
     setInterval(async () => {
       await processPendingTasks();
+      await observeCreatorGoals();
       await observeExperimentOutcomes();
     }, POLLING_INTERVAL_MS);
   } else {
