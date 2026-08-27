@@ -357,15 +357,23 @@ async function runLoop() {
   console.log("🚀 Agent Worker Started");
   if (isDryRun) console.log("⚠️ Running in DRY RUN mode");
   
-  await processPendingTasks();
-  await observeCreatorGoals();
-  await observeExperimentOutcomes();
+  try {
+    await processPendingTasks();
+    await observeCreatorGoals();
+    await observeExperimentOutcomes();
+  } catch (err) {
+    console.error("[Worker] Error during initial loop pass:", err);
+  }
   
   if (!runOnce) {
     setInterval(async () => {
-      await processPendingTasks();
-      await observeCreatorGoals();
-      await observeExperimentOutcomes();
+      try {
+        await processPendingTasks();
+        await observeCreatorGoals();
+        await observeExperimentOutcomes();
+      } catch (err) {
+        console.error("[Worker] Error during loop pass:", err);
+      }
     }, POLLING_INTERVAL_MS);
   } else {
     console.log("Finished single pass.");

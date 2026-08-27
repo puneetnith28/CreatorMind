@@ -5,7 +5,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full relative">
+      <div className="min-h-screen flex w-full relative overflow-x-hidden">
         <div className="hero-orb h-72 w-72 bg-blue-300/30 left-[-6rem] top-[-4rem]" />
         <div className="hero-orb h-72 w-72 bg-purple-300/25 right-[-7rem] top-[5rem]" />
         <AppSidebar />
