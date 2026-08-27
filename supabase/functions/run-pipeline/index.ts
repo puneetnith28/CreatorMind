@@ -655,6 +655,50 @@ async function loadApprovedBaseline(
   return `Latest approved output baseline (v${approved.version}):\n${summary}`;
 }
 
+async function loadActiveOpportunity(
+  userClient: ReturnType<typeof createClient>,
+): Promise<string> {
+  const { data } = await userClient
+    .from("opportunities")
+    .select("title, description, reasoning")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!data) return "No active opportunities.";
+
+  return `ACTIVE STRATEGIC OPPORTUNITY\nTitle: ${data.title}\nDescription: ${data.description}\nReasoning: ${data.reasoning}\nEnsure the generated output aligns with this strategic opportunity.`;
+}
+
+async function loadCreatorMindContext(
+  adminClient: ReturnType<typeof createClient>,
+  userId: string,
+): Promise<string> {
+  const { data: profile } = await adminClient
+    .from("profiles")
+    .select("id")
+    .eq("user_id", userId)
+    .single();
+
+  if (!profile) return "CREATOR DNA\nNot available.";
+
+  const [{ data: dna }, { data: goals }] = await Promise.all([
+    adminClient.from("creator_dna").select("*").eq("user_id", profile.id).maybeSingle(),
+    adminClient.from("creator_goals").select("*").eq("user_id", profile.id).eq("status", "active"),
+  ]);
+
+  const dnaBlock = dna 
+    ? `CREATOR DNA\nNiche: ${dna.niche || "N/A"}\nTarget Audience: ${dna.target_audience || "N/A"}\nTone: ${dna.tone || "N/A"}\nPreferred Formats: ${(dna.preferred_formats || []).join(", ") || "N/A"}\nAvoid Topics: ${(dna.avoid_topics || []).join(", ") || "N/A"}` 
+    : `CREATOR DNA\nNot available.`;
+
+  const goalsBlock = goals && goals.length > 0
+    ? `ACTIVE GOALS\n${goals.map(g => `- ${g.goal_type}: ${g.target_metric} (Priority: ${g.priority})`).join("\n")}`
+    : `ACTIVE GOALS\nNone set.`;
+
+  return `${dnaBlock}\n\n${goalsBlock}`;
+}
+
 async function callAgent(
   openAiApiKey: string,
   agent: AgentDefinition,
@@ -886,6 +930,8 @@ Deno.serve(async (req) => {
   let channelBaseline: ChannelBaseline | null = null;
   let externalInsights: ExternalInsightRow[] = [];
   let approvedBaselineText = "No prior approved output baseline.";
+  let activeOpportunityText = "No active opportunities.";
+  let creatorMindContextText = "No creator DNA or goals set.";
   let collectorStatus: ExportResult = { status: "skipped", error: null };
 
   try {
@@ -908,11 +954,13 @@ Deno.serve(async (req) => {
 
     runId = run.id;
 
-    [compiledMemoryMap, channelBaseline, externalInsights, approvedBaselineText] = await Promise.all([
+    [compiledMemoryMap, channelBaseline, externalInsights, approvedBaselineText, activeOpportunityText, creatorMindContextText] = await Promise.all([
       loadCompiledMemory(adminClient, user.id, video.id),
       loadChannelBaseline(adminClient, user.id),
       loadExternalInsights(adminClient, user.id, video.id),
       loadApprovedBaseline(adminClient, user.id, video.id),
+      loadActiveOpportunity(userClient),
+      loadCreatorMindContext(adminClient, user.id),
     ]);
 
     const externalInsightText = externalInsights.length > 0
@@ -944,7 +992,7 @@ Deno.serve(async (req) => {
       description: video.description,
       isPro,
       memoryByAgent: compiledMemoryMap,
-      channelBaselineText: `${channelBaseline.text}\n\nEXTERNAL INSIGHTS\n${externalInsightText}\n\nAPPROVED BASELINE\n${approvedBaselineText}`,
+      channelBaselineText: `${creatorMindContextText}\n\n${channelBaseline.text}\n\nEXTERNAL INSIGHTS\n${externalInsightText}\n\nAPPROVED BASELINE\n${approvedBaselineText}\n\n${activeOpportunityText}`,
     };
 
     const artifactRows: Array<{

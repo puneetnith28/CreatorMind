@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { OpportunityEngine } from "@/components/OpportunityEngine";
+import { AgentStateMachine } from "@/components/AgentStateMachine";
 
 interface VideoRow {
   id: string;
@@ -173,6 +174,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        <AgentStateMachine />
         <OpportunityEngine />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

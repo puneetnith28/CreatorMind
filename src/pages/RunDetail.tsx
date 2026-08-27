@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Check, Download, FileArchive, MessageSquareWarning, X } from "lucide-react";
+import { ArrowLeft, Check, Download, FileArchive, MessageSquareWarning, X, Sparkles, Target, Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,13 @@ interface RunRow {
   completed_at: string | null;
 }
 
+interface OpportunityRow {
+  id: string;
+  title: string;
+  description: string;
+  reasoning: string;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   strategy: "Strategy Notes",
   script: "Script Draft",
@@ -59,6 +66,7 @@ export default function RunDetail() {
   const { toast } = useToast();
   const [run, setRun] = useState<RunRow | null>(null);
   const [artifacts, setArtifacts] = useState<ArtifactRow[]>([]);
+  const [activeOpportunity, setActiveOpportunity] = useState<OpportunityRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [feedbackReason, setFeedbackReason] = useState<string>("not_engaging");
@@ -70,15 +78,20 @@ export default function RunDetail() {
   const [advancedFeedbackOpen, setAdvancedFeedbackOpen] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [finalizedLinks, setFinalizedLinks] = useState<{ jsonUrl: string | null; pdfUrl: string | null } | null>(null);
+  
+  const [editingArtifactId, setEditingArtifactId] = useState<string | null>(null);
+  const [editDraftText, setEditDraftText] = useState<string>("");
 
   const fetchData = async () => {
     if (!runId) return;
-    const [{ data: runData }, { data: artifactData }] = await Promise.all([
+    const [{ data: runData }, { data: artifactData }, { data: oppData }] = await Promise.all([
       supabase.from("runs").select("*").eq("id", runId).single(),
       supabase.from("artifacts").select("*").eq("run_id", runId).order("created_at"),
+      supabase.from("opportunities").select("id, title, description, reasoning").eq("status", "approved").order("created_at", { ascending: false }).limit(1).maybeSingle(),
     ]);
     setRun(runData);
     setArtifacts(artifactData || []);
+    setActiveOpportunity(oppData);
     setLoading(false);
   };
 
@@ -86,18 +99,48 @@ export default function RunDetail() {
     fetchData();
   }, [runId]);
 
-  const updateApproval = async (artifactId: string, status: "approved" | "rejected") => {
+  const updateApproval = async (artifactId: string, status: "approved" | "rejected", newContent?: string) => {
+    const updatePayload: Record<string, any> = {
+      approval_status: status,
+      approved_at: status === "approved" ? new Date().toISOString() : null,
+    };
+    
+    if (newContent !== undefined) {
+      updatePayload.content = newContent;
+    }
+
     const { error } = await supabase
       .from("artifacts")
-      .update({
-        approval_status: status,
-        approved_at: status === "approved" ? new Date().toISOString() : null,
-      })
+      .update(updatePayload)
       .eq("id", artifactId);
 
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
       return;
+    }
+
+    if (status === "approved") {
+      const { data: runData } = await supabase.from("artifacts").select("run_id").eq("id", artifactId).single();
+      if (runData) {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          await supabase.from("growth_events").insert({
+            user_id: userData.user.id,
+            event_type: "CREATOR_APPROVED",
+            artifact_id: artifactId,
+            run_id: runData.run_id,
+            metadata: {
+              source: "RunDetail",
+              edited: newContent !== undefined
+            }
+          });
+        }
+      }
+    }
+
+    if (editingArtifactId === artifactId) {
+      setEditingArtifactId(null);
+      setEditDraftText("");
     }
 
     fetchData();
@@ -295,6 +338,25 @@ export default function RunDetail() {
           </Card>
         )}
 
+        {activeOpportunity && (
+          <Card className="border-emerald-500/30 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 shadow-sm">
+            <CardContent className="pt-6 pb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Target className="h-4 w-4 text-emerald-600" />
+                <h2 className="font-semibold text-emerald-900">Guiding Strategic Opportunity</h2>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-emerald-950">{activeOpportunity.title}</p>
+                <p className="text-sm text-emerald-800/90">{activeOpportunity.description}</p>
+                <div className="mt-2 bg-white/60 p-3 rounded-md border border-emerald-100/50">
+                  <p className="text-xs font-semibold text-emerald-900 mb-1">Reasoning</p>
+                  <p className="text-sm text-emerald-800">{activeOpportunity.reasoning}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {Object.entries(grouped).map(([type, arts]) => (
           <div key={type}>
             <h2 className="text-lg font-display font-semibold mb-3">{TYPE_LABELS[type] || type}</h2>
@@ -328,6 +390,17 @@ export default function RunDetail() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="text-primary border-primary hover:bg-primary/10"
+                            onClick={() => {
+                              setEditingArtifactId(art.id);
+                              setEditDraftText(art.content || "");
+                            }}
+                          >
+                            <Edit2 className="mr-1 h-3 w-3" />Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="text-destructive border-destructive hover:bg-destructive/10"
                             onClick={() => openFeedbackDialog(art.id, true)}
                           >
@@ -342,7 +415,41 @@ export default function RunDetail() {
                         </Button>
                       )}
                     </div>
-                    <p className="text-sm whitespace-pre-wrap text-slate-700">{art.content || "No content"}</p>
+                    
+                    {editingArtifactId === art.id ? (
+                      <div className="space-y-3 mt-2">
+                        <Textarea 
+                          value={editDraftText} 
+                          onChange={(e) => setEditDraftText(e.target.value)}
+                          className="min-h-[150px] font-mono text-sm"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingArtifactId(null);
+                              setEditDraftText("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={async () => {
+                              await updateApproval(art.id, "approved", editDraftText);
+                              await autoAnalyzeApprovedArtifact(art.id);
+                              toast({ title: "Saved and Approved", description: "Your edits have been saved." });
+                            }}
+                          >
+                            Save & Approve
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap text-slate-700">{art.content || "No content"}</p>
+                    )}
+                    
                     {art.type === "thumbnail" && (
                       <div className="mt-3 space-y-2">
                         {getThumbnailUrl(art) && (
