@@ -158,9 +158,10 @@ Return your answer in the following strict JSON format ONLY. Do not include any 
     if (insertError) throw insertError;
 
     // 5. Save the Proposed Experiment
-    if (parsedData.experiment) {
+    if (parsedData.experiment && newOpportunity) {
       const { error: expError } = await adminClient.from("experiments").insert({
         user_id: user.id, // references auth.users(id)
+        opportunity_id: newOpportunity.id,
         hypothesis: parsedData.experiment.hypothesis,
         variant_a: parsedData.experiment.variant_a,
         variant_b: parsedData.experiment.variant_b,

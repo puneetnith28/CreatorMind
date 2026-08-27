@@ -98,9 +98,25 @@ export function ActivityTimeline() {
         return `Checked live YouTube APIs to observe active A/B experiment outcomes.`;
       case 'extract_learnings':
         return `Analyzed a completed experiment to extract and save a new Creator Preference.`;
+      case 'poll_goals':
+        return `Woke up to check for active goals and signals to act upon.`;
       default:
         return `Autonomously executed ${task.task_type.replace(/_/g, ' ')}.`;
     }
+  };
+
+  const getPayloadDetails = (task: AgentTask) => {
+    if (!task.payload) return null;
+    if (task.task_type === 'generate_opportunity' && task.payload.title) {
+      return `Opportunity detected: "${task.payload.title}"`;
+    }
+    if (task.task_type === 'observe_experiments' && task.payload.winner) {
+      return `Experiment concluded. Winner: Variant ${task.payload.winner}`;
+    }
+    if (task.task_type === 'extract_learnings' && task.payload.rule) {
+      return `Learned: "${task.payload.rule}"`;
+    }
+    return null;
   };
 
   return (
@@ -159,8 +175,14 @@ export function ActivityTimeline() {
                     )}
                   </div>
                   
-                  <div className="mt-1 text-sm text-slate-700 bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 leading-relaxed shadow-sm">
-                    {generateActionSummary(task)}
+                  <div className="mt-1 text-sm text-slate-700 bg-slate-50/50 p-3 rounded-lg border border-slate-100 leading-relaxed shadow-sm">
+                    <p>{generateActionSummary(task)}</p>
+                    {getPayloadDetails(task) && (
+                      <div className="mt-2 text-xs font-medium text-purple-700 bg-purple-50/50 p-2 rounded border border-purple-100 flex items-start gap-1.5">
+                        <Wand2 className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                        <span>{getPayloadDetails(task)}</span>
+                      </div>
+                    )}
                   </div>
 
                   {task.error_message && (
