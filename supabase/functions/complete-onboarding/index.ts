@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
 
   const body = await req.json().catch(() => null) as {
     goal?: string;
+    targetAudience?: string;
     autoSelectStyles?: boolean;
     tone?: string;
     pacing?: string;
@@ -55,6 +56,7 @@ Deno.serve(async (req) => {
   } | null;
 
   const goal = body?.goal?.trim() || "";
+  const targetAudience = body?.targetAudience?.trim() || "";
   const autoSelectStyles = body?.autoSelectStyles !== false;
   const manualTone = body?.tone?.trim() || "clear_confident";
   const manualPacing = body?.pacing?.trim() || "fast";
@@ -84,6 +86,7 @@ Deno.serve(async (req) => {
   const prompt = [
     "Create an onboarding strategy pack for a creator channel.",
     `Channel goal + niche: ${goal}`,
+    `Target audience: ${targetAudience}`,
     `Auto select styles: ${autoSelectStyles ? "yes" : "no"}`,
     `Manual tone: ${manualTone}`,
     `Manual pacing: ${manualPacing}`,
@@ -271,7 +274,7 @@ Deno.serve(async (req) => {
   const { error: dnaError } = await adminClient.from("creator_dna").upsert({
     user_id: user.id,
     niche: goal,
-    target_audience: "",
+    target_audience: targetAudience,
     tone,
     preferred_formats: [scriptLengthPreference],
     avoid_topics: bannedPhrases,
@@ -296,7 +299,7 @@ Deno.serve(async (req) => {
   try {
     await syncCreatorContext({
       niche: goal,
-      audience: "",
+      audience: targetAudience,
       tone,
       goal: goal,
       preferred_formats: [scriptLengthPreference],

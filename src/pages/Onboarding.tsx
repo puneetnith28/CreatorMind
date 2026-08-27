@@ -27,6 +27,7 @@ export default function Onboarding() {
   const { toast } = useToast();
 
   const [goal, setGoal] = useState("");
+  const [targetAudience, setTargetAudience] = useState("");
   const [tone, setTone] = useState("clear_confident");
   const [pacing, setPacing] = useState("fast");
   const [hookStyle, setHookStyle] = useState("curiosity_with_value");
@@ -73,6 +74,7 @@ export default function Onboarding() {
     const { data, error } = await supabase.functions.invoke("complete-onboarding", {
       body: {
         goal: goal.trim(),
+        targetAudience: targetAudience.trim(),
         autoSelectStyles,
         tone,
         pacing,
@@ -143,6 +145,16 @@ export default function Onboarding() {
                 onChange={(event) => setGoal(event.target.value)}
                 placeholder="Example: I help startup founders explain AI tools in under 60 seconds with practical examples."
                 className="min-h-[120px]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Target Audience</Label>
+              <Textarea
+                value={targetAudience}
+                onChange={(event) => setTargetAudience(event.target.value)}
+                placeholder="Example: Early-stage tech startup founders who are looking to scale their engineering teams."
+                className="min-h-[80px]"
               />
             </div>
 

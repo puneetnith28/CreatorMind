@@ -308,17 +308,45 @@ export default function Preferences() {
 
   const syncYoutubeChannel = async () => {
     setYoutubeBusy("sync");
-    const { data, error } = await supabase.functions.invoke("youtube-sync-channel", { body: {} });
-    if (error || (data as { error?: string } | null)?.error) {
+    
+    // 1. Fetch YouTube data
+    const { data: ytData, error: ytError } = await supabase.functions.invoke("youtube-sync-channel", { body: {} });
+    if (ytError || (ytData as { error?: string } | null)?.error) {
       toast({
         title: "YouTube sync failed",
-        description: error?.message || (data as { error?: string } | null)?.error || "Unknown error",
+        description: ytError?.message || (ytData as { error?: string } | null)?.error || "Unknown error",
         variant: "destructive",
       });
       setYoutubeBusy(null);
       return;
     }
-    toast({ title: "YouTube synced", description: "Recent video metrics/comments were ingested." });
+
+    // 2. Push insights to Animoca Mind
+    const { data: mindData, error: mindError } = await supabase.functions.invoke("sync-insights-to-mind", { body: {} });
+    if (mindError || (mindData as { error?: string } | null)?.error) {
+      toast({
+        title: "Mind sync warning",
+        description: mindError?.message || (mindData as { error?: string } | null)?.error || "Failed to feed into Animoca Mind.",
+        variant: "destructive",
+      });
+      setYoutubeBusy(null);
+      return;
+    }
+
+    // 3. Generate a new opportunity based on this fresh data
+    const { data: oppData, error: oppError } = await supabase.functions.invoke("generate-opportunity", { body: {} });
+    if (oppError || (oppData as { error?: string } | null)?.error) {
+      const respData = oppData as { error?: string; raw_response?: string } | null;
+      toast({
+        title: "Opportunity Engine warning",
+        description: respData?.raw_response ? `AI response: ${respData.raw_response.substring(0, 150)}...` : (oppError?.message || respData?.error || "Failed to generate a new opportunity."),
+        variant: "destructive",
+      });
+      setYoutubeBusy(null);
+      return;
+    }
+
+    toast({ title: "YouTube synced", description: "Recent video metrics were ingested and the Mind has generated a new opportunity! Check your Dashboard." });
     setYoutubeBusy(null);
     fetchData();
   };

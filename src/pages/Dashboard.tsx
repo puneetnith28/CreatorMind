@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { OpportunityEngine } from "@/components/OpportunityEngine";
 
 interface VideoRow {
   id: string;
@@ -171,6 +172,8 @@ export default function Dashboard() {
             </Dialog>
           </CardContent>
         </Card>
+
+        <OpportunityEngine />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="surface-card">
