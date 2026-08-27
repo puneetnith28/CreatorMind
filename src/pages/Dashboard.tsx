@@ -17,6 +17,7 @@ import { OpportunityEngine } from "@/components/OpportunityEngine";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { AgentStateMachine } from "@/components/AgentStateMachine";
 import { MindMemoryUI } from "@/components/MindMemoryUI";
+import { CurrentGoals } from "@/components/CurrentGoals";
 
 interface VideoRow {
   id: string;
@@ -177,6 +178,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        <CurrentGoals />
         <AgentStateMachine />
         <OpportunityEngine />
         <ActivityTimeline />

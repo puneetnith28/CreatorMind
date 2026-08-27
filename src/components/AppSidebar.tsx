@@ -1,4 +1,4 @@
-import { LayoutDashboard, CreditCard, Activity, LogOut, SlidersHorizontal } from "lucide-react";
+import { LayoutDashboard, CreditCard, Activity, LogOut, SlidersHorizontal, Brain } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -19,6 +19,7 @@ const navItems = [
   { title: "Preferences", url: "/preferences", icon: SlidersHorizontal },
   { title: "Billing", url: "/billing", icon: CreditCard },
   { title: "Observability", url: "/observability", icon: Activity },
+  { title: "Mind Memory", url: "/mind", icon: Brain },
 ];
 
 export function AppSidebar() {

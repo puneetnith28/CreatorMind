@@ -84,6 +84,25 @@ export function ActivityTimeline() {
     return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  const generateActionSummary = (task: AgentTask) => {
+    if (task.status === 'failed') return `Attempted to ${task.task_type.replace(/_/g, ' ')} but encountered an error.`;
+    
+    switch (task.task_type) {
+      case 'analyze_youtube_video':
+        return `Analyzed video engagement metrics and extracted viewer sentiment.`;
+      case 'generate_opportunity':
+        return `Cross-referenced Creator DNA with market trends to discover a new content opportunity.`;
+      case 'run_pipeline':
+        return `Executed the autonomous content review pipeline for the latest upload.`;
+      case 'observe_experiments':
+        return `Checked live YouTube APIs to observe active A/B experiment outcomes.`;
+      case 'extract_learnings':
+        return `Analyzed a completed experiment to extract and save a new Creator Preference.`;
+      default:
+        return `Autonomously executed ${task.task_type.replace(/_/g, ' ')}.`;
+    }
+  };
+
   return (
     <Card className="glass-card mt-6">
       <CardHeader>
@@ -126,20 +145,23 @@ export function ActivityTimeline() {
                     </Badge>
                   </div>
                   
-                  <div className="text-sm text-slate-500">
-                    {formatDistanceToNow(new Date(task.created_at), { addSuffix: true })}
+                  <div className="text-sm font-mono text-slate-500 flex items-center gap-2">
+                    <span className="font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
+                      {new Date(task.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span>
+                      {formatDistanceToNow(new Date(task.created_at), { addSuffix: true })}
+                    </span>
                     {task.completed_at && task.status === 'completed' && (
-                      <span className="ml-2">
+                      <span className="text-emerald-600 ml-1">
                         (took {Math.round((new Date(task.completed_at).getTime() - new Date(task.created_at).getTime()) / 1000)}s)
                       </span>
                     )}
                   </div>
                   
-                  {task.payload && Object.keys(task.payload).length > 0 && (
-                    <div className="mt-2 text-xs bg-slate-50 p-2 rounded border font-mono overflow-hidden text-ellipsis">
-                      {JSON.stringify(task.payload)}
-                    </div>
-                  )}
+                  <div className="mt-1 text-sm text-slate-700 bg-slate-50/50 p-2.5 rounded-lg border border-slate-100 leading-relaxed shadow-sm">
+                    {generateActionSummary(task)}
+                  </div>
 
                   {task.error_message && (
                     <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded border border-red-100">

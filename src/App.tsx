@@ -14,6 +14,7 @@ import Billing from "./pages/Billing";
 import Observability from "./pages/Observability";
 import Onboarding from "./pages/Onboarding";
 import Preferences from "./pages/Preferences";
+import Mind from "./pages/Mind";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/preferences" element={<ProtectedRoute><Preferences /></ProtectedRoute>} />
             <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
             <Route path="/observability" element={<ProtectedRoute><Observability /></ProtectedRoute>} />
+            <Route path="/mind" element={<ProtectedRoute><Mind /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

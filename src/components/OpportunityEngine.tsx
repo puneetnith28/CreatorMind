@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Check, X } from "lucide-react";
+import { Sparkles, Check, X, BrainCircuit, Microscope } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Opportunity {
@@ -86,24 +86,33 @@ export function OpportunityEngine() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="bg-white/60 rounded-xl p-4 text-sm text-emerald-900 border border-emerald-100">
-            <span className="font-semibold block mb-1">Why this matters right now:</span>
-            {opportunity.reasoning}
-          </div>
-          
-          {opportunity.evidence && opportunity.evidence.length > 0 && (
-            <div className="text-sm">
-              <span className="font-semibold text-emerald-900 mb-2 block">Supporting Data:</span>
-              <ul className="space-y-1">
-                {opportunity.evidence.map((ev, i) => (
-                  <li key={i} className="flex items-start gap-2 text-emerald-800">
-                    <span className="text-emerald-500 mt-0.5">•</span>
-                    <span>{ev}</span>
-                  </li>
-                ))}
-              </ul>
+          <div className="bg-white/80 rounded-xl p-5 text-sm text-emerald-950 border border-emerald-200 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+            <div className="flex items-center gap-2 mb-3">
+              <BrainCircuit className="w-5 h-5 text-emerald-600" />
+              <span className="font-bold text-base block">Why Did I Do This? (Mind Rationale)</span>
             </div>
-          )}
+            <p className="leading-relaxed mb-4 text-emerald-800">
+              {opportunity.reasoning}
+            </p>
+            
+            {opportunity.evidence && opportunity.evidence.length > 0 && (
+              <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
+                <span className="font-semibold text-emerald-900 mb-2 flex items-center gap-1.5">
+                  <Microscope className="w-4 h-4 text-emerald-600" />
+                  Supporting Evidence & DNA Alignment:
+                </span>
+                <ul className="space-y-1.5 ml-1">
+                  {opportunity.evidence.map((ev, i) => (
+                    <li key={i} className="flex items-start gap-2 text-emerald-800/90">
+                      <span className="text-emerald-500 mt-0.5">•</span>
+                      <span className="leading-tight">{ev}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
 
           <div className="flex items-center gap-3 pt-2">
             <Button 

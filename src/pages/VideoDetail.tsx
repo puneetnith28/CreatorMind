@@ -159,7 +159,7 @@ export default function VideoDetail() {
     window.open(data.signedUrl, "_blank");
   };
 
-  const useApprovedAsBaseline = async (output: ApprovedOutputRow) => {
+  const handleUseApprovedAsBaseline = async (output: ApprovedOutputRow) => {
     if (!user || !videoId) return;
     setApplyingBaseline(output.id);
 
@@ -546,7 +546,7 @@ export default function VideoDetail() {
                     <div className="flex items-center gap-2">
                       <Button size="sm" variant="outline" onClick={() => downloadApprovedFile(output.json_storage_path)}>JSON</Button>
                       <Button size="sm" variant="outline" onClick={() => downloadApprovedFile(output.pdf_storage_path)}>PDF</Button>
-                      <Button size="sm" onClick={() => useApprovedAsBaseline(output)} disabled={applyingBaseline === output.id}>
+                      <Button size="sm" onClick={() => handleUseApprovedAsBaseline(output)} disabled={applyingBaseline === output.id}>
                         {applyingBaseline === output.id ? "Applying..." : "Use As Baseline"}
                       </Button>
                     </div>
