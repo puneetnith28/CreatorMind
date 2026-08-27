@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { OpportunityEngine } from "@/components/OpportunityEngine";
+import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { AgentStateMachine } from "@/components/AgentStateMachine";
 
 interface VideoRow {
@@ -23,6 +24,7 @@ interface VideoRow {
   status: string;
   created_at: string;
 }
+
 
 async function readFunctionErrorMessage(error: unknown): Promise<string> {
   const fallback = error instanceof Error ? error.message : "Unknown error";
@@ -176,6 +178,7 @@ export default function Dashboard() {
 
         <AgentStateMachine />
         <OpportunityEngine />
+        <ActivityTimeline />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="surface-card">

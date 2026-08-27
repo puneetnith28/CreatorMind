@@ -246,30 +246,27 @@ export default function VideoDetail() {
   const triggerRun = async () => {
     if (!videoId || !user) return;
     setRunning(true);
-    const { data, error } = await supabase.functions.invoke("run-pipeline", {
-      body: { videoId },
+    
+    // Instead of invoking the edge function directly, we enqueue a task
+    // for the autonomous background worker to pick up and process safely.
+    const { error } = await supabase.from('agent_tasks').insert({
+      user_id: user.id,
+      task_type: 'run_pipeline',
+      payload: { videoId },
+      status: 'pending'
     });
 
     if (error) {
-      toast({ title: "Run failed", description: error.message, variant: "destructive" });
-      await fetchData();
+      toast({ title: "Run failed to queue", description: error.message, variant: "destructive" });
       setRunning(false);
       return;
     }
 
-    if ((data as { error?: string } | null)?.error) {
-      toast({
-        title: "Run failed",
-        description: (data as { error: string }).error,
-        variant: "destructive",
-      });
-      await fetchData();
-      setRunning(false);
-      return;
-    }
-
-    toast({ title: "Run complete", description: "Artifacts were generated successfully." });
-    await fetchData();
+    toast({ title: "Run queued", description: "The autonomous worker will process this shortly." });
+    
+    // Refresh to show the new run if one was created, although the worker
+    // will actually create the run record in the database when it starts.
+    // For immediate UI feedback, we can just stop the loading state.
     setRunning(false);
   };
 

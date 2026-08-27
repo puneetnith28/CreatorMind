@@ -13,7 +13,9 @@
     "test:watch": "vitest",
     "openclaw:once": "node scripts/openclaw-worker.mjs --once",
     "openclaw:worker": "node scripts/openclaw-worker.mjs",
-    "openclaw:dry": "node scripts/openclaw-worker.mjs --once --dry-run"
+    "openclaw:dry": "node scripts/openclaw-worker.mjs --once --dry-run",
+    "agent:worker": "node scripts/agent-worker.mjs",
+    "agent:once": "node scripts/agent-worker.mjs --once"
   },
   "dependencies": {
     "@animocabrands/minds-client-lib": "^0.1.4",
