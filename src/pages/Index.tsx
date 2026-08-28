@@ -30,9 +30,7 @@ export default function Index() {
       <header className="sticky top-0 z-50 w-full border-b border-slate-200/50 bg-white/50 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="pulse-dot bg-indigo-500 relative">
-              <span className="absolute inset-0 rounded-full animate-ping bg-indigo-500/40" />
-            </span>
+            <img src="/CM.png" alt="CreatorMind Logo" className="w-8 h-8 rounded-lg shadow-sm" />
             <span className="font-display font-bold text-xl tracking-tight text-slate-900">CreatorMind</span>
           </div>
           <div className="flex items-center gap-4">

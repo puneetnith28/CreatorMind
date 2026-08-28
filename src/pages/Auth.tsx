@@ -64,10 +64,13 @@ export default function Auth() {
 
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="surface-card p-1">
-          <CardHeader className="text-left">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 w-fit">
-              <Sparkles className="h-3.5 w-3.5 text-blue-500" />
-              Creator Access
+          <CardHeader className="text-left space-y-4">
+            <div className="flex items-center gap-3">
+              <img src="/CM.png" alt="CreatorMind Logo" className="w-10 h-10 rounded-xl shadow-sm" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 w-fit">
+                <Sparkles className="h-3.5 w-3.5 text-blue-500" />
+                Creator Access
+              </div>
             </div>
             <CardTitle className="text-4xl font-display">Welcome to CreatorMind</CardTitle>
             <CardDescription className="text-base">

@@ -43,9 +43,7 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="pulse-dot bg-emerald-500">
-                  <span className="pulse-dot bg-emerald-500/40 absolute inset-0 animate-ping" />
-                </span>
+                <img src="/CM.png" alt="CreatorMind Logo" className="w-8 h-8 rounded-lg shadow-sm" />
                 <h1 className="text-lg font-bold font-display text-sidebar-foreground tracking-tight">CreatorMind</h1>
               </div>
               <p className="text-xs text-slate-500">Multi-agent content autopilot</p>
