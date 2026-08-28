@@ -217,6 +217,16 @@ export default function Index() {
         </section>
 
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200/50 bg-white/50 backdrop-blur-md py-8 relative z-10">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-slate-500">© 2026 CreatorMind. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/privacy" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">Privacy Policy</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
