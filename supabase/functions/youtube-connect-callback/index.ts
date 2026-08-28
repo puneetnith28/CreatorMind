@@ -93,6 +93,11 @@ Deno.serve(async (req) => {
   const channelJson = await channelResponse.json() as { items?: Array<{ id: string }> };
   const channelId = channelJson.items?.[0]?.id ?? null;
 
+  if (!channelId) {
+    if (frontendUrl) return Response.redirect(`${frontendUrl}/preferences?youtube=error&reason=${encodeURIComponent("No YouTube channel found. Please create a channel on YouTube first.")}`, 302);
+    return html("No YouTube channel found for this Google account. Please create a channel first.");
+  }
+
   const encryptedAccess = await encryptText(tokenJson.access_token, encryptionKey);
   const encryptedRefresh = tokenJson.refresh_token ? await encryptText(tokenJson.refresh_token, encryptionKey) : null;
   const expiresAt = tokenJson.expires_in ? new Date(Date.now() + tokenJson.expires_in * 1000).toISOString() : null;

@@ -101,16 +101,16 @@ Return your answer in the following strict JSON format ONLY. Do not include any 
     const replyOutcome = await mindsClient.waitForReply({ alias, timeoutMs: 120000 });
     
     const fallbackData = {
-      title: "Double Down on Video WorkLoop",
-      description: "Your 'Video WorkLoop' content is driving all your recent views and engagement. Create a follow-up or a deep-dive series on this topic.",
-      reasoning: "Since 'Video WorkLoop' generated 16 views and 2 likes compared to 0 on other videos, the audience has clearly validated this concept. Leaning into proven winners is the fastest path to growth.",
-      evidence: ["Video WorkLoop: 16 views, 2 likes", "Open Source Workshop: 0 views, 0 likes"],
+      title: "Create Content Consistently",
+      description: "We are still gathering baseline data for your channel. Focus on publishing consistently to give the AI more signals to analyze.",
+      reasoning: "Without enough performance data, the best strategy is consistency. Establish a publishing rhythm so we can identify what resonates with your audience.",
+      evidence: ["Insufficient historical performance data."],
       experiment: {
-        hypothesis: "A deep-dive tutorial will yield higher retention than a broad overview.",
-        variant_a: "Deep-dive tutorial (step-by-step)",
-        variant_b: "Broad overview (high-level concepts)",
-        baseline_metric: { metric: "Average View Duration" },
-        success_metric: { metric: "Average View Duration" }
+        hypothesis: "Publishing weekly will establish a baseline for audience retention and engagement.",
+        variant_a: "Consistent weekly schedule",
+        variant_b: "Ad-hoc publishing",
+        baseline_metric: { metric: "Publishing Consistency" },
+        success_metric: { metric: "Views per Video" }
       }
     };
 
