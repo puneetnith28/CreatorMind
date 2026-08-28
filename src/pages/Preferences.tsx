@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,7 @@ interface FeedbackItem {
 
 export default function Preferences() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, refreshProfile } = useAuth();
   const { toast } = useToast();
 
@@ -146,6 +147,23 @@ export default function Preferences() {
   useEffect(() => {
     fetchData();
   }, [user]);
+
+  useEffect(() => {
+    const youtubeStatus = searchParams.get("youtube");
+    const reason = searchParams.get("reason");
+    
+    if (youtubeStatus === "connected") {
+      toast({ title: "YouTube Connected", description: "Your channel was successfully linked." });
+      // Remove query param without triggering a reload
+      searchParams.delete("youtube");
+      setSearchParams(searchParams, { replace: true });
+    } else if (youtubeStatus === "error") {
+      toast({ title: "YouTube Connect Failed", description: reason || "Unknown error", variant: "destructive" });
+      searchParams.delete("youtube");
+      searchParams.delete("reason");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams, toast]);
 
   const updateInspiration = (index: number, key: keyof InspirationItem, value: string) => {
     setInspirations((prev) => prev.map((item, i) => (i === index ? { ...item, [key]: value } : item)));
