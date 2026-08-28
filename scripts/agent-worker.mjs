@@ -353,6 +353,16 @@ async function observeCreatorGoals() {
   }
 }
 
+import http from 'http';
+
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Agent Worker is running\n');
+}).listen(PORT, () => {
+  console.log(`[Worker] HTTP Server listening on port ${PORT} (for Render health checks)`);
+});
+
 async function runLoop() {
   console.log("🚀 Agent Worker Started");
   if (isDryRun) console.log("⚠️ Running in DRY RUN mode");
