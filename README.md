@@ -26,14 +26,14 @@ We didn't just build another AI feature. We built an autonomous loop that mathem
 
 ## ✨ Features Overview
 
-### 🧠 1. Persistent Creator Memory
-Your agent maintains a permanent **Creator DNA** profile (your niche, audience, tone, and constraints). As you use the platform, it dynamically extracts **Learned Preferences and Patterns** from your feedback and analytics. It never suggests a generic idea, and it never forgets what you like.
+### 🧠 1. Persistent Creator Memory (Powered by helloMinds)
+Your agent maintains a permanent **Creator DNA** profile using the **Animoca Brands Minds SDK**. Every interaction, accepted/rejected idea, and analytics report is stored as memory context. The Mind dynamically extracts **Learned Preferences and Patterns**, meaning it never suggests a generic idea, and it never forgets what you like.
 
 ### 🎥 2. YouTube Data Integration
 Users can seamlessly link their YouTube accounts via Google OAuth. The system automatically pulls channel metrics, views, retention stats, and audience engagement data, turning raw analytics into actionable insights.
 
 ### ⚙️ 3. Autonomous Background Worker
-You don't need to click buttons for the AI to work. A continuous background worker polls the database, checking on your goals, monitoring live YouTube metrics, and generating new content opportunities entirely on its own. You can track everything it does in the real-time **Activity Timeline**.
+You don't need to click buttons for the AI to work. A continuous background worker polls the database, checking on your goals, monitoring live YouTube metrics, and triggering the **helloMinds API** to generate new content opportunities entirely on its own. You can track everything it does in the real-time **Activity Timeline**.
 
 ### 🧪 4. The Opportunity Engine & Growth Experiments
 When the Mind detects a growth opportunity, it doesn't just guess. It proposes A/B experiments (e.g., *Test A: Standard Hook vs. Test B: Problem-First Hook*). The background worker securely fetches real-time YouTube metrics to observe the experiment outcomes. 
@@ -51,13 +51,13 @@ A fully functioning Stripe integration supports Pro/Starter subscriptions. The c
 
 ## 🛠️ Tech Stack & Architecture
 
+- **AI Intelligence:** **Animoca Brands helloMinds SDK** (`@animocabrands/minds-client-lib`) for persistent memory, reasoning, and autonomous opportunity generation.
 - **Frontend:** React, TypeScript, Vite, Tailwind CSS, `shadcn/ui`
 - **Routing:** React Router
 - **Authentication:** Supabase Auth
 - **Database:** Supabase (PostgreSQL, Row Level Security)
 - **Background Autonomy:** Node.js Worker (`scripts/agent-worker.mjs`) interacting with Supabase via `service_role_key`
-- **Serverless API:** Supabase Edge Functions (Deno) for Stripe, Google OAuth, and data syncing
-- **AI Intelligence:** Animoca Minds SDK integration for persistent memory and reasoning
+- **Serverless API:** Supabase Edge Functions (Deno) for Minds API integration, Stripe, Google OAuth, and data syncing
 - **Payments:** Stripe (Checkout, Subscriptions, Webhooks)
 - **Deployment:** Vercel (Frontend), Render (Worker), Supabase (Backend/Database)
 
