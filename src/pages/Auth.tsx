@@ -30,7 +30,8 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/dashboard");
+        // DO NOT explicitly navigate here.
+        // AuthContext will update 'user', and the component will automatically redirect.
       } else {
         const { error } = await supabase.auth.signUp({
           email,
