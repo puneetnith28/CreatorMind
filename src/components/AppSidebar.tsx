@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { LayoutDashboard, CreditCard, Activity, LogOut, SlidersHorizontal, Brain, ChevronsUpDown, User2 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,6 +36,16 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -98,7 +109,7 @@ export function AppSidebar() {
                   {!collapsed && (
                     <>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">{user?.user_metadata?.name || 'Creator'}</span>
+                        <span className="truncate font-semibold">{user?.user_metadata?.full_name || 'Creator'}</span>
                         <span className="truncate text-xs text-slate-500">{user?.email}</span>
                       </div>
                       <ChevronsUpDown className="ml-auto size-4" />
@@ -120,13 +131,13 @@ export function AppSidebar() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{user?.user_metadata?.name || 'Creator'}</span>
+                      <span className="truncate font-semibold">{user?.user_metadata?.full_name || 'Creator'}</span>
                       <span className="truncate text-xs text-slate-500">{user?.email}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
